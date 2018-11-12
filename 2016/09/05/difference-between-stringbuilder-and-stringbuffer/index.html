@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+    
+
+    
+<!-- Tencent Speed -->
+<script>var _speedMark = new Date()</script>
+<!-- End Tencent Speed -->
+<!-- Tencent Analysis -->
+<script async src="//tajs.qq.com/stats?sId=62987721"></script>
+<!-- End Tencent Analysis -->
+
+
+    
+<!-- Baidu Tongji -->
+<script>var _hmt = _hmt || []</script>
+<script async src="//hm.baidu.com/hm.js?eacacdefbe98e3b19a0b75b243dbeb5c"></script>
+<!-- End Baidu Tongji -->
+
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    <title>简述StringBuilder和StringBuffer的区别 | El barco | Just another mediocre programmer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="Java">
+    <meta name="description" content="从StringBuilder和StringBuffer的不同说起最近在搬砖的时候，发现在拼接字符串的时候，有人习惯使用StringBuffer，有人习惯使用StringBuilder，于是想到了之前在知乎上看到的这个讨论：国内Java面试总是问StringBuffer，StringBuilder区别是啥？档次为什么这么低，果然这在面试中只是一道预热筛选题嘛">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="简述StringBuilder和StringBuffer的区别">
+<meta property="og:url" content="http://elbarco.cn/2016/09/05/difference-between-stringbuilder-and-stringbuffer/index.html">
+<meta property="og:site_name" content="El barco">
+<meta property="og:description" content="从StringBuilder和StringBuffer的不同说起最近在搬砖的时候，发现在拼接字符串的时候，有人习惯使用StringBuffer，有人习惯使用StringBuilder，于是想到了之前在知乎上看到的这个讨论：国内Java面试总是问StringBuffer，StringBuilder区别是啥？档次为什么这么低，果然这在面试中只是一道预热筛选题嘛">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://bop-to.top/catplus.png">
+<meta property="og:image" content="http://bop-to.top/catsb.png">
+<meta property="og:image" content="http://bop-to.top/catsb2.png">
+<meta property="og:updated_time" content="2018-09-23T06:09:32.395Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="简述StringBuilder和StringBuffer的区别">
+<meta name="twitter:description" content="从StringBuilder和StringBuffer的不同说起最近在搬砖的时候，发现在拼接字符串的时候，有人习惯使用StringBuffer，有人习惯使用StringBuilder，于是想到了之前在知乎上看到的这个讨论：国内Java面试总是问StringBuffer，StringBuilder区别是啥？档次为什么这么低，果然这在面试中只是一道预热筛选题嘛">
+<meta name="twitter:image" content="http://bop-to.top/catplus.png">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=1.6.10">
+    <script>window.lazyScripts=[]</script>
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Fan Zhang</h5>
+          <a href="mailto:zh.f@outlook.com" title="zh.f@outlook.com" class="mail">zh.f@outlook.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/">
+                <i class="icon icon-lg icon-home"></i>
+                Home
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives">
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags">
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/links">
+                <i class="icon icon-lg icon-link"></i>
+                Links
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/zh-f" target="_blank">
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">简述StringBuilder和StringBuffer的区别</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">简述StringBuilder和StringBuffer的区别</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2016-09-05T06:36:37.000Z" itemprop="datePublished" class="page-time">
+  2016-09-05
+</time>
+
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#从StringBuilder和StringBuffer的不同说起"><span class="post-toc-number">1.</span> <span class="post-toc-text">从StringBuilder和StringBuffer的不同说起</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#再论拼接字符串的不同方法和效率"><span class="post-toc-number">2.</span> <span class="post-toc-text">再论拼接字符串的不同方法和效率</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#另一个角度较真儿的验证"><span class="post-toc-number">3.</span> <span class="post-toc-text">另一个角度较真儿的验证</span></a></li></ol>
+        </nav>
+    </aside>
+    
+<article id="post-difference-between-stringbuilder-and-stringbuffer" class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">简述StringBuilder和StringBuffer的区别</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2016-09-05 14:36:37" datetime="2016-09-05T06:36:37.000Z" itemprop="datePublished">2016-09-05</time>
+
+            
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style="display:none">
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h3 id="从StringBuilder和StringBuffer的不同说起"><a href="#从StringBuilder和StringBuffer的不同说起" class="headerlink" title="从StringBuilder和StringBuffer的不同说起"></a>从StringBuilder和StringBuffer的不同说起</h3><p>最近在搬砖的时候，发现在拼接字符串的时候，有人习惯使用StringBuffer，有人习惯使用StringBuilder，于是想到了之前在知乎上看到的这个讨论：<a href="https://www.zhihu.com/question/50211894" target="_blank" rel="noopener">国内Java面试总是问StringBuffer，StringBuilder区别是啥？档次为什么这么低</a>，果然这在面试中只是一道预热筛选题嘛<a id="more"></a>，不过一下子让我答，却并不能立刻回答上来区别，于是顺手Google了一下，在<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StringBuilder.html" target="_blank" rel="noopener">StringBuilder</a>和<a href="http://docs.oracle.com/javase/7/docs/api/java/lang/StringBuffer.html" target="_blank" rel="noopener">StringBuffer</a>的API(JDK1.7)里找到了答案。下面就做一下简述——</p>
+<p>首先，<code>StringBuffer</code>和<code>StringBuilder</code>都是可变字符串，但是前者是线程安全的，因为在调用StringBuffer的操作时是同步的，在源代码中看到的就是方法上加了<code>synchronized</code>关键字：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> StringBuffer <span class="title">append</span><span class="params">(String str)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.append(str);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure></p>
+<p>而在StringBuilder的源码中，我们看到的是这样的：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> StringBuilder <span class="title">append</span><span class="params">(String str)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.append(str);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面仅截取部分代码，更多的代码大家可自行查看。</p>
+<p>在<code>StringBuffer</code>的API说明中，提到，在JDK5中，开始提供了功能相同，但是非线程安全、不使用<code>synchronized</code>、性能更好的类<code>StringBuilder</code>，在<code>StringBuilder</code>API说明中，有提到这么一句话：</p>
+<blockquote>
+<p>Instances of StringBuilder are not safe for use by multiple threads. If such synchronization is required then it is recommended that StringBuffer be used.</p>
+</blockquote>
+<p>即只有在同步是必要的情况下，才建议使用<code>StringBuffer</code>。</p>
+<h3 id="再论拼接字符串的不同方法和效率"><a href="#再论拼接字符串的不同方法和效率" class="headerlink" title="再论拼接字符串的不同方法和效率"></a>再论拼接字符串的不同方法和效率</h3><p>至此，区别就简述完了。什么，这就完了？摔……按照面试套路，理论上应该是进入下一话题了，不过这里我们还是要继续，现在就抛出一个非常基础常见的套路问题——</p>
+<blockquote>
+<p>问：常见的拼接字符串的方法有哪些？</p>
+</blockquote>
+<p>答案是：String的<code>concat</code>方法、<code>+</code>操作符；<code>StringBuffer</code>和<code>StringBuilder</code>的<code>append</code>方法。</p>
+<blockquote>
+<p>再问：上面几种方法效率如何？</p>
+</blockquote>
+<p>答案也很简单，当然是<code>StringBuilder&gt;StringBuffer&gt;concat或+操作符</code>。</p>
+<p>回答完是什么之后，我们再问问为什么。首先，StringBuffer的每个append操作都是同步的，所以比StringBuilder要慢，那么为什么都比<code>concat</code>或者<code>+</code>效率搞呢？于是又Google一下，找到了这个<a href="http://stackoverflow.com/questions/14927630/java-string-concat-vs-stringbuilder-optimised-so-what-should-i-do" target="_blank" rel="noopener">讨论</a>（Google大法好！Stackoverflow大法好！Orz..），里面提到，在JDK1.6之后，使用”+”操作符时，编译器会自动使用StringBuilder将两个字符append到一起，比如我们代码里是这样写的：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String one = <span class="string">"abc"</span>;</span><br><span class="line">String two = <span class="string">"xyz"</span>;</span><br><span class="line">String three = one + two;</span><br></pre></td></tr></table></figure></p>
+<p>在编译的时候，<code>String three</code>会被编译成：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String three = <span class="keyword">new</span> StringBuilder().append(one).append(two).toString();</span><br></pre></td></tr></table></figure></p>
+<p>乍一看，是效率了很多，但是如果在循环中这样干：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String out = <span class="string">""</span>;</span><br><span class="line"><span class="keyword">for</span>( <span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10000</span> ; i++ ) &#123;</span><br><span class="line">    out = out + i;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> out;</span><br></pre></td></tr></table></figure></p>
+<p>那么在编译时，可能得到的内容就是这样子的：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String out = <span class="string">""</span>;</span><br><span class="line"><span class="keyword">for</span>( <span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10000</span>; i++ ) &#123;</span><br><span class="line">    out = <span class="keyword">new</span> StringBuilder().append(out).append(i).toString();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> out;</span><br></pre></td></tr></table></figure></p>
+<p>此时，我们其实都知道应该这样写：<br><figure class="highlight java"><table><tr><td class="code"><pre><span class="line">StringBuilder out = <span class="keyword">new</span> StringBuilder();</span><br><span class="line"><span class="keyword">for</span>( <span class="keyword">int</span> i = <span class="number">0</span> ; i &lt; <span class="number">10000</span>; i++ ) &#123;</span><br><span class="line">    out.append(i);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">return</span> out.toString();</span><br></pre></td></tr></table></figure></p>
+<p>这也反映了，编译器一定程度上可以帮助我们优化，但是写出高效的代码，还需要我们自己。</p>
+<h3 id="另一个角度较真儿的验证"><a href="#另一个角度较真儿的验证" class="headerlink" title="另一个角度较真儿的验证"></a>另一个角度较真儿的验证</h3><p>上面的代码是13年答主在JDK1.6中测试的结果，又有一位较真儿的朋友，在不同的JDK版本中进行了测试，全文见<a href="https://www.javacodegeeks.com/2013/03/java-stringbuilder-myth-debunked.html" target="_blank" rel="noopener">Java StringBuilder myth debunked</a>，最终得到了下面的图表：</p>
+<ul>
+<li>使用<code>+</code>操作符</li>
+</ul>
+<p><img src="http://bop-to.top/catplus.png" alt=""></p>
+<ul>
+<li>使用<code>StringBuilder</code></li>
+</ul>
+<p><img src="http://bop-to.top/catsb.png" alt=""></p>
+<ul>
+<li>使用<code>StringBuilder</code>的基准</li>
+</ul>
+<p><img src="http://bop-to.top/catsb2.png" alt=""></p>
+<p>这位童鞋贴心的把测试用的代码托管在<a href="https://github.com/skuro/stringbuilder" target="_blank" rel="noopener">Github</a>上，有兴趣的可以去看一下。最终这篇文章得出的结论就是——通过对字节码的分析，我们得到了答案，显而易见的是，使用<code>StringBuilder</code>是可以提高性能的。文章开篇还提到这么一句话——</p>
+<blockquote>
+<p>Concatenating two Strings with the plus operator is the source of all evil — Anonymous Java dev</p>
+</blockquote>
+<p>与大家共勉。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+
+        
+        尊重原创，转载请标注作者及原文链接，感谢~
+        
+    </div>
+    <footer>
+        <a href="http://elbarco.cn">
+            <img src="/img/avatar.jpg" alt="Fan Zhang">
+            Fan Zhang
+        </a>
+    </footer>
+</blockquote>
+
+        
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-btn waves-light">Donate</a>
+</div>
+
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/">Java</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://elbarco.cn/2016/09/05/difference-between-stringbuilder-and-stringbuffer/&title=《简述StringBuilder和StringBuffer的区别》 — El barco&pic=http://elbarco.cn/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://elbarco.cn/2016/09/05/difference-between-stringbuilder-and-stringbuffer/&title=《简述StringBuilder和StringBuffer的区别》 — El barco&source=从StringBuilder和StringBuffer的不同说起最近在搬砖的时候，发现在拼接字符串的时候，有人习惯使用StringBuffer，有人习惯使..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://elbarco.cn/2016/09/05/difference-between-stringbuilder-and-stringbuffer/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《简述StringBuilder和StringBuffer的区别》 — El barco&url=http://elbarco.cn/2016/09/05/difference-between-stringbuilder-and-stringbuffer/&via=http://elbarco.cn" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://elbarco.cn/2016/09/05/difference-between-stringbuilder-and-stringbuffer/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2016/12/28/introduction-to-galera-cluster-for-mysql/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h5 class="title">Galera Cluster for MySQL介绍</h5>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2016/07/01/使用Logrotate管理MongoDB日志-后记/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h5 class="title">使用Logrotate管理MongoDB日志-后记</h5>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+<section class="comments" id="comments">
+    <div id="disqus_thread"></div>
+    <script>
+    var disqus_shortname = 'elbarco-cn';
+    lazyScripts.push('//' + disqus_shortname + '.disqus.com/embed.js')
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+<div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        Thanks for donating
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/wechat.jpg" alt="DonateQRCode">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">Wechat</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">Alipay</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+
+
+</div>
+
+        <footer class="footer">
+    <!-- div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        UV：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        PV：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+        </p>
+    </div -->
+    <div class="bottom">
+    
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        UV：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        PV：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p><span>Fan Zhang &copy; 2016 - 2018</span>
+            <span>
+                
+                <a href="http://www.miitbeian.gov.cn/publish/query/indexFirst.action" target="_blank">京ICP备16008405号-2</a><br>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://elbarco.cn/2016/09/05/difference-between-stringbuilder-and-stringbuffer/&title=《简述StringBuilder和StringBuffer的区别》 — El barco&pic=http://elbarco.cn/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://elbarco.cn/2016/09/05/difference-between-stringbuilder-and-stringbuffer/&title=《简述StringBuilder和StringBuffer的区别》 — El barco&source=从StringBuilder和StringBuffer的不同说起最近在搬砖的时候，发现在拼接字符串的时候，有人习惯使用StringBuffer，有人习惯使..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://elbarco.cn/2016/09/05/difference-between-stringbuilder-and-stringbuffer/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《简述StringBuilder和StringBuffer的区别》 — El barco&url=http://elbarco.cn/2016/09/05/difference-between-stringbuilder-and-stringbuffer/&via=http://elbarco.cn" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://elbarco.cn/2016/09/05/difference-between-stringbuilder-and-stringbuffer/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://elbarco.cn/2016/09/05/difference-between-stringbuilder-and-stringbuffer/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+
+
+lazyScripts.push('//s95.cnzz.com/z_stat.php?id=1257688433&web_id=1257688433')
+
+</script>
+
+<script src="/js/main.min.js?v=1.6.10"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="/js/search.min.js?v=1.6.10" async></script>
+
+
+
+
+
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

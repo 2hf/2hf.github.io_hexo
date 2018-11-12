@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+    
+
+    
+<!-- Tencent Speed -->
+<script>var _speedMark = new Date()</script>
+<!-- End Tencent Speed -->
+<!-- Tencent Analysis -->
+<script async src="//tajs.qq.com/stats?sId=62987721"></script>
+<!-- End Tencent Analysis -->
+
+
+    
+<!-- Baidu Tongji -->
+<script>var _hmt = _hmt || []</script>
+<script async src="//hm.baidu.com/hm.js?eacacdefbe98e3b19a0b75b243dbeb5c"></script>
+<!-- End Baidu Tongji -->
+
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    <title>使用Logrotate管理MongoDB日志 | El barco | Just another mediocre programmer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="MongoDB,Logrotate">
+    <meta name="description" content="痛点前段时间需要查询MongoDB日志，惊觉MongoDB的日志并没有配置自动切换轮转，这会导致在繁忙的业务下，日志增长量惊人。面对海量的MongoDB日志，开发和运维人员查看日志变的十分不方便，所以需要寻求使日志自动切换轮转的方式。">
+<meta name="keywords" content="MongoDB,Logrotate">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用Logrotate管理MongoDB日志">
+<meta property="og:url" content="http://elbarco.cn/2016/06/30/使用Logrotate管理MongoDB日志/index.html">
+<meta property="og:site_name" content="El barco">
+<meta property="og:description" content="痛点前段时间需要查询MongoDB日志，惊觉MongoDB的日志并没有配置自动切换轮转，这会导致在繁忙的业务下，日志增长量惊人。面对海量的MongoDB日志，开发和运维人员查看日志变的十分不方便，所以需要寻求使日志自动切换轮转的方式。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2017-07-01T03:04:55.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用Logrotate管理MongoDB日志">
+<meta name="twitter:description" content="痛点前段时间需要查询MongoDB日志，惊觉MongoDB的日志并没有配置自动切换轮转，这会导致在繁忙的业务下，日志增长量惊人。面对海量的MongoDB日志，开发和运维人员查看日志变的十分不方便，所以需要寻求使日志自动切换轮转的方式。">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=1.6.10">
+    <script>window.lazyScripts=[]</script>
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Fan Zhang</h5>
+          <a href="mailto:zh.f@outlook.com" title="zh.f@outlook.com" class="mail">zh.f@outlook.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/">
+                <i class="icon icon-lg icon-home"></i>
+                Home
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives">
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags">
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/links">
+                <i class="icon icon-lg icon-link"></i>
+                Links
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/zh-f" target="_blank">
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">使用Logrotate管理MongoDB日志</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">使用Logrotate管理MongoDB日志</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2016-06-30T07:26:03.000Z" itemprop="datePublished" class="page-time">
+  2016-06-30
+</time>
+
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#痛点"><span class="post-toc-number">1.</span> <span class="post-toc-text">痛点</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#选型"><span class="post-toc-number">2.</span> <span class="post-toc-text">选型</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#Logrotate"><span class="post-toc-number">3.</span> <span class="post-toc-text">Logrotate</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#简介"><span class="post-toc-number">3.1.</span> <span class="post-toc-text">简介</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#配置说明"><span class="post-toc-number">3.2.</span> <span class="post-toc-text">配置说明</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#使用Logrotate管理MongoDB日志"><span class="post-toc-number">4.</span> <span class="post-toc-text">使用Logrotate管理MongoDB日志</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#找到日志文件及PID记录文件"><span class="post-toc-number">4.1.</span> <span class="post-toc-text">找到日志文件及PID记录文件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#编写配置文件"><span class="post-toc-number">4.2.</span> <span class="post-toc-text">编写配置文件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#验证"><span class="post-toc-number">4.3.</span> <span class="post-toc-text">验证</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#特别指出"><span class="post-toc-number">4.4.</span> <span class="post-toc-text">特别指出</span></a></li></ol></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#结语"><span class="post-toc-number">5.</span> <span class="post-toc-text">结语</span></a></li></ol>
+        </nav>
+    </aside>
+    
+<article id="post-使用Logrotate管理MongoDB日志" class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">使用Logrotate管理MongoDB日志</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2016-06-30 15:26:03" datetime="2016-06-30T07:26:03.000Z" itemprop="datePublished">2016-06-30</time>
+
+            
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style="display:none">
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h2 id="痛点"><a href="#痛点" class="headerlink" title="痛点"></a>痛点</h2><p>前段时间需要查询MongoDB日志，惊觉MongoDB的日志并没有配置自动切换轮转，这会导致在繁忙的业务下，日志增长量惊人。面对海量的MongoDB日志，开发和运维人员查看日志变的十分不方便，所以需要寻求使日志自动切换轮转的方式。<a id="more"></a></p>
+<h2 id="选型"><a href="#选型" class="headerlink" title="选型"></a>选型</h2><p>通过查看MongoDB官方文档，知悉MongoDB提供了几种轮转日志文件的策略，详见<a href="https://docs.mongodb.com/manual/tutorial/rotate-log-files/" target="_blank" rel="noopener">这里</a>（据说新版本的MongoDB已经完成了自动的日志轮转功能？）。其中，可以使用MongoDB提供的<a href="https://docs.mongodb.com/manual/reference/command/logRotate/#dbcmd.logRotate" target="_blank" rel="noopener"><code>logRotate</code></a>命令或者通过向<code>mongod</code>进程发送<code>SIGUSR1</code>信号来实现。</p>
+<p>然而看很多文章中均表示，MongoDB本身提供的logRotate机制存在很多问题，比如由于其不稳定性，会造成日志轮换中mongodb进程终止，不提供旧日志的压缩，即使轮转切换日志，还是占用了很多磁盘空间；日志文件重命名格式<code>mongodb.log.2016-10-22T17-44-44</code>不友好等等。所以我们在选择时就会变得很小心，尽量避免使用其内置logRotate。</p>
+<p>被广泛认可的方案是通过<a href="http://linux.die.net/man/8/logrotate" target="_blank" rel="noopener">Logrotate</a>进行日志管理，其中可以执行脚本实现向<code>mongod</code>进程发送<code>SIGUSR1</code>信号。</p>
+<h2 id="Logrotate"><a href="#Logrotate" class="headerlink" title="Logrotate"></a>Logrotate</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>Logrotate可以帮助我们管理日志文件。比如周期性的读取日志、压缩日志、备份日志、创建新的日志文件等，基本上你希望做的，都能实现。通常来讲，常被用于来避免单个日志文件增长为难以处理的大小。也常被用于删除旧的日志文件来释放磁盘空间。</p>
+<p>通常来讲，默认的Logrotate会作为<code>/etc/cron.daily/</code>中的一个计划任务每天执行一次。<br><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[root@localhost etc]# ls /etc/cron.daily/</span><br><span class="line">cups  logrotate  makewhatis.cron  mlocate.cron</span><br></pre></td></tr></table></figure></p>
+<h3 id="配置说明"><a href="#配置说明" class="headerlink" title="配置说明"></a>配置说明</h3><p>配置Logrotate通过编辑两处配置文件来完成：</p>
+<ul>
+<li>/etc/logrotate.conf</li>
+<li>/etc/logrotate.d/下面的不同服务特定的配置</li>
+</ul>
+<p><code>logrotate.conf</code>包含了通用的配置，下面是一个默认配置：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># see &quot;man logrotate&quot; for details</span><br><span class="line"># rotate log files weekly</span><br><span class="line">weekly</span><br><span class="line"></span><br><span class="line"># keep 4 weeks worth of backlogs</span><br><span class="line">rotate 4</span><br><span class="line"></span><br><span class="line"># create new (empty) log files after rotating old ones</span><br><span class="line">create</span><br><span class="line"></span><br><span class="line"># use date as a suffix of the rotated file</span><br><span class="line">dateext</span><br><span class="line"></span><br><span class="line"># uncomment this if you want your log files compressed</span><br><span class="line">#compress</span><br><span class="line"></span><br><span class="line"># RPM packages drop log rotation information into this directory</span><br><span class="line">include /etc/logrotate.d</span><br><span class="line"></span><br><span class="line"># no packages own wtmp and btmp -- we&apos;ll rotate them here</span><br><span class="line">/var/log/wtmp &#123;</span><br><span class="line">    monthly</span><br><span class="line">    create 0664 root utmp</span><br><span class="line">        minsize 1M</span><br><span class="line">    rotate 1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">/var/log/btmp &#123;</span><br><span class="line">    missingok</span><br><span class="line">    monthly</span><br><span class="line">    create 0600 root utmp</span><br><span class="line">    rotate 1</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"># system-specific logs may be also be configured here.</span><br></pre></td></tr></table></figure>
+<p>上面的通用配置我们不用过多关心，因为我们具体服务的具体配置在目录<code>/etc/logrotate.d/</code>下。在这个目录里，许多应用在安装后已经设置了Logrotate，比如httpd，nginx等。下面，我们拿nginx的配置做一个简要的说明：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# cd /etc/logrotate.d/</span><br><span class="line">[root@localhost logrotate.d]# ll</span><br><span class="line">total 44</span><br><span class="line">-rw-r--r--. 1 root root 185 Aug  2  2013 httpd</span><br><span class="line">-rw-r--r--. 1 root root 871 Jun 22  2015 mysqld</span><br><span class="line">-rw-r--r--. 1 root root 302 Apr 26 23:10 nginx</span><br><span class="line">-rw-r--r--. 1 root root 219 Nov 23  2013 sssd</span><br><span class="line">-rw-r--r--. 1 root root 210 Aug 15  2013 syslog</span><br><span class="line">-rw-r--r--. 1 root root 100 Feb 22  2013 yum</span><br><span class="line">[root@localhost logrotate.d]# cat nginx </span><br><span class="line">/var/log/nginx/*.log &#123;</span><br><span class="line">        daily</span><br><span class="line">        missingok</span><br><span class="line">        rotate 52</span><br><span class="line">        compress</span><br><span class="line">        delaycompress</span><br><span class="line">        notifempty</span><br><span class="line">        create 640 nginx adm</span><br><span class="line">        sharedscripts</span><br><span class="line">        postrotate</span><br><span class="line">                [ -f /var/run/nginx.pid ] &amp;&amp; kill -USR1 `cat /var/run/nginx.pid`</span><br><span class="line">        endscript</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先第一行，配置了要自动轮换的日志文件的路径<code>/var/log/nginx/*.log</code>，即针对在<code>/var/log/nginx</code>下的<code>*.log</code>文件进行轮换。</p>
+<ul>
+<li>daily：每天轮换日志。可选选项有daily，weekly，monthly和yearly</li>
+<li>missingok：找不到*.log文件也是ok的，不要方……</li>
+<li>rotate 52：保留52个日志文件，其他更老旧的日志文件删掉（在这里要配合daily使用，即保留52天的日志文件）</li>
+<li>compress：压缩日志文件（默认gzip格式）<ul>
+<li>delaycompress：延迟压缩任务直到第二次轮换日志才进行。结果会导致你会有当前的日志文件，一个较旧的没有被压缩过的日志文件和一些压缩过的日志文件</li>
+<li>compresscmd：设置使用什么命令来进行压缩，默认是gzip</li>
+<li>uncompresscmd：设置解压的命令，默认是gunzip。</li>
+</ul>
+</li>
+<li>notifempty：不轮转空文件</li>
+<li>create 640 nginx adm：创建一个新的日志文件，并设置权限permissions/owner/group。本例中，使用用户ngxin和用户组adm创建了一个日志文件，文件权限为640.在很多系统中，owner和group一般都会是root。</li>
+<li>sharedscripts：在所有的日志轮换完毕后执行postrotate脚本。如果该项没有设置，则会在每个匹配的文件轮换后执行postrotate脚本。</li>
+<li>postrotate：轮换日志完成后运行的脚本。</li>
+</ul>
+<p>更多的选项，参见<a href="http://linux.die.net/man/8/logrotate" target="_blank" rel="noopener">这里</a>。</p>
+<h2 id="使用Logrotate管理MongoDB日志"><a href="#使用Logrotate管理MongoDB日志" class="headerlink" title="使用Logrotate管理MongoDB日志"></a>使用Logrotate管理MongoDB日志</h2><p>经过上面对Logrotate的简单说明，这是我们就可以开始使用它来管理MongoDB日志了。</p>
+<h3 id="找到日志文件及PID记录文件"><a href="#找到日志文件及PID记录文件" class="headerlink" title="找到日志文件及PID记录文件"></a>找到日志文件及PID记录文件</h3><p>首先，我们的MongoDB启动配置中，指定了<code>logpath</code>和<code>pidfilepath</code>：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">logpath=/mongoData/mongodb_log/mongodb.log </span><br><span class="line">pidfilepath=/mongoData/mongodb.pid</span><br></pre></td></tr></table></figure>
+<p><code>mongod.pid</code>和文件<code>/mongoData/mongodb_data/mongod.lock</code>中都存有mongod的PID，用这两个文件都可以获取PID，任选其一即可。</p>
+<h3 id="编写配置文件"><a href="#编写配置文件" class="headerlink" title="编写配置文件"></a>编写配置文件</h3><p>通过<code>man logrotate</code>查看详细参数，结合业务需求，编写的配置文件如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">/mongoData/mongodb_log/mongodb.log  &#123;</span><br><span class="line">	daily</span><br><span class="line">    missingok</span><br><span class="line">    rotate 30</span><br><span class="line">    copytruncate </span><br><span class="line">    dateext  </span><br><span class="line">    compress</span><br><span class="line">    notifempty</span><br><span class="line">    create 644 root root </span><br><span class="line">    sharedscripts</span><br><span class="line">    postrotate</span><br><span class="line">    	/bin/kill -SIGUSR1 &apos;cat /mongoData/mongodb.pid 2&gt; /dev/null&apos; 2&gt; /dev/null || true</span><br><span class="line">    endscript</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里做一下简单说明：</p>
+<ul>
+<li><code>copytruncate</code> 这个命令很重要，意思是在创建副本后，将原文件清空，而不是将原文件重命名并创建新的日志文件。这样可以避免有些应用继续向原日志文件中输出，而不是新的日志文件。在没有配置这个命令之前，mongodb一直向轮换后的带时间戳的旧文件中输出日志。</li>
+<li><code>dateext</code> 用于切换日志文件时命名成为<code>mongodb.log-YYYYMMDD</code>格式。 </li>
+<li><code>create 644 root root</code> 644权限，即<code>-rw-r--r--</code>与之前的日志文件保持一直的权限即可。</li>
+</ul>
+<h3 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h3><p>编写完配置文件之后，我们将文件拷贝到<code>/etc/logrotate.d/</code>下，执行命令<code>logrotate -f -v /etc/logrotate.d/&lt;YOUR_CONFIG_FILE_NAME&gt;</code>来验证日志是否被轮换了，示例执行结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">root@localhost mongodb_log]# logrotate -f -v /etc/logrotate.d/mongologrotate</span><br><span class="line">reading config file /etc/logrotate.d/mongologrotate</span><br><span class="line">reading config info for /mongoData/mongodb_log/mongodb.log</span><br><span class="line"></span><br><span class="line">Handling 1 logs</span><br><span class="line"></span><br><span class="line">rotating pattern: /mongoData/mongodb_log/mongodb.log  forced from command line (30 rotations)</span><br><span class="line">empty log files are not rotated, old logs are removed</span><br><span class="line">considering log /mongoData/mongodb_log/mongodb.log</span><br><span class="line">  log needs rotating</span><br><span class="line">rotating log /mongoData/mongodb_log/mongodb.log, log-&gt;rotateCount is 30</span><br><span class="line">dateext suffix '-20160630'</span><br><span class="line">glob pattern '-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'</span><br><span class="line">glob finding old rotated logs failed</span><br><span class="line">copying /mongoData/mongodb_log/mongodb.log to /mongoData/mongodb_log/mongodb.log-20160630</span><br><span class="line">set default create context</span><br><span class="line">truncating /mongoData/mongodb_log/mongodb.log</span><br><span class="line">running postrotate script</span><br><span class="line">compressing log with: /bin/gzip</span><br><span class="line">[root@localhost mongodb_log]# ll</span><br><span class="line">total 69604</span><br><span class="line">-rw-r--r--. 1 root root    37092 Jun 30 13:24 mongodb.log</span><br><span class="line">-rw-r--r--. 1 root root  1047190 Jun 30 13:24 mongodb.log-20160630.gz</span><br></pre></td></tr></table></figure>
+<h3 id="特别指出"><a href="#特别指出" class="headerlink" title="特别指出"></a>特别指出</h3><p>由于我们的服务期开启了SELinux，并且是<code>Enforcing</code>模式下，会造成非<code>/var/log/</code>目录下的logrotate操作失败，所以需要执行下面的命令：<br><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# semanage fcontext -a -t var_log_t '/mongoData/mongodb_log/mongodb.log'</span><br><span class="line">[root@localhost ~]# restorecon -Frvv /mongoData/mongodb_log/mongodb.log</span><br></pre></td></tr></table></figure></p>
+<p>上面的第一条命令用来定义mongodb.log这个文件的上下文，记录会被持久化到<code>/etc/selinux/targeted/contexts/files/file_contexts.local</code>里，我们可以验证一下。<br><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">[root@localhost ~]# cat /etc/selinux/targeted/contexts/files/file_contexts.local</span><br><span class="line"><span class="meta">#</span><span class="bash"> This file is auto-generated by libsemanage</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> Do not edit directly.</span></span><br><span class="line"></span><br><span class="line">/mongoData/mongodb_log/mongodb.log    system_u:object_r:var_log_t:s0</span><br></pre></td></tr></table></figure></p>
+<p>上面的第二条命令，可以递归的设置上下文，如果我们传入的是一个目录，则目录下的所有子目录及文件都会被递归的统一设置。</p>
+<p>关于这个问题的说明，可以<a href="https://access.redhat.com/solutions/39006" target="_blank" rel="noopener">点击这里</a>查看更多说明和解释。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>至此，我们边完成了使用Logrotate来管理MongoDB日志了。可以看到，Logrotate十分强大，在使用时，可以通过<code>man logrotate</code>查看一下具体参数，知其然并知其所以然，让其更好地为我们所用。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+
+        
+        尊重原创，转载请标注作者及原文链接，感谢~
+        
+    </div>
+    <footer>
+        <a href="http://elbarco.cn">
+            <img src="/img/avatar.jpg" alt="Fan Zhang">
+            Fan Zhang
+        </a>
+    </footer>
+</blockquote>
+
+        
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-btn waves-light">Donate</a>
+</div>
+
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Logrotate/">Logrotate</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MongoDB/">MongoDB</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://elbarco.cn/2016/06/30/使用Logrotate管理MongoDB日志/&title=《使用Logrotate管理MongoDB日志》 — El barco&pic=http://elbarco.cn/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://elbarco.cn/2016/06/30/使用Logrotate管理MongoDB日志/&title=《使用Logrotate管理MongoDB日志》 — El barco&source=痛点前段时间需要查询MongoDB日志，惊觉MongoDB的日志并没有配置自动切换轮转，这会导致在繁忙的业务下，日志增长量惊人。面对海量的MongoDB日..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://elbarco.cn/2016/06/30/使用Logrotate管理MongoDB日志/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《使用Logrotate管理MongoDB日志》 — El barco&url=http://elbarco.cn/2016/06/30/使用Logrotate管理MongoDB日志/&via=http://elbarco.cn" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://elbarco.cn/2016/06/30/使用Logrotate管理MongoDB日志/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2016/07/01/使用Logrotate管理MongoDB日志-后记/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h5 class="title">使用Logrotate管理MongoDB日志-后记</h5>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2016/04/27/MongoDB复制集Secondary节点持续Recovering状态解决办法/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h5 class="title">MongoDB复制集Secondary节点持续Recovering状态解决办法</h5>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+<section class="comments" id="comments">
+    <div id="disqus_thread"></div>
+    <script>
+    var disqus_shortname = 'elbarco-cn';
+    lazyScripts.push('//' + disqus_shortname + '.disqus.com/embed.js')
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+<div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        Thanks for donating
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/wechat.jpg" alt="DonateQRCode">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">Wechat</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">Alipay</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+
+
+</div>
+
+        <footer class="footer">
+    <!-- div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        UV：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        PV：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+        </p>
+    </div -->
+    <div class="bottom">
+    
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        UV：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        PV：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p><span>Fan Zhang &copy; 2016 - 2018</span>
+            <span>
+                
+                <a href="http://www.miitbeian.gov.cn/publish/query/indexFirst.action" target="_blank">京ICP备16008405号-2</a><br>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://elbarco.cn/2016/06/30/使用Logrotate管理MongoDB日志/&title=《使用Logrotate管理MongoDB日志》 — El barco&pic=http://elbarco.cn/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://elbarco.cn/2016/06/30/使用Logrotate管理MongoDB日志/&title=《使用Logrotate管理MongoDB日志》 — El barco&source=痛点前段时间需要查询MongoDB日志，惊觉MongoDB的日志并没有配置自动切换轮转，这会导致在繁忙的业务下，日志增长量惊人。面对海量的MongoDB日..." data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://elbarco.cn/2016/06/30/使用Logrotate管理MongoDB日志/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《使用Logrotate管理MongoDB日志》 — El barco&url=http://elbarco.cn/2016/06/30/使用Logrotate管理MongoDB日志/&via=http://elbarco.cn" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://elbarco.cn/2016/06/30/使用Logrotate管理MongoDB日志/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://elbarco.cn/2016/06/30/使用Logrotate管理MongoDB日志/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+
+
+lazyScripts.push('//s95.cnzz.com/z_stat.php?id=1257688433&web_id=1257688433')
+
+</script>
+
+<script src="/js/main.min.js?v=1.6.10"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="/js/search.min.js?v=1.6.10" async></script>
+
+
+
+
+
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>

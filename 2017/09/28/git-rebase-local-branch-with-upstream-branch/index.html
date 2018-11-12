@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+    
+
+    
+<!-- Tencent Speed -->
+<script>var _speedMark = new Date()</script>
+<!-- End Tencent Speed -->
+<!-- Tencent Analysis -->
+<script async src="//tajs.qq.com/stats?sId=62987721"></script>
+<!-- End Tencent Analysis -->
+
+
+    
+<!-- Baidu Tongji -->
+<script>var _hmt = _hmt || []</script>
+<script async src="//hm.baidu.com/hm.js?eacacdefbe98e3b19a0b75b243dbeb5c"></script>
+<!-- End Baidu Tongji -->
+
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    <title>Git中使用rebase命令更新本地分支 | El barco | Just another mediocre programmer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="Git,rebase">
+    <meta name="description" content="最近在开发trove中，因为误提交，本地项目的devel分支已经与上游的的devel分支不一致了">
+<meta name="keywords" content="Git,rebase">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Git中使用rebase命令更新本地分支">
+<meta property="og:url" content="http://elbarco.cn/2017/09/28/git-rebase-local-branch-with-upstream-branch/index.html">
+<meta property="og:site_name" content="El barco">
+<meta property="og:description" content="最近在开发trove中，因为误提交，本地项目的devel分支已经与上游的的devel分支不一致了">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2017-10-23T23:31:57.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Git中使用rebase命令更新本地分支">
+<meta name="twitter:description" content="最近在开发trove中，因为误提交，本地项目的devel分支已经与上游的的devel分支不一致了">
+    
+    <link rel="shortcut icon" href="/img/favicon.ico">
+    <link rel="stylesheet" href="/css/style.css?v=1.6.10">
+    <script>window.lazyScripts=[]</script>
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Fan Zhang</h5>
+          <a href="mailto:zh.f@outlook.com" title="zh.f@outlook.com" class="mail">zh.f@outlook.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/">
+                <i class="icon icon-lg icon-home"></i>
+                Home
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives">
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags">
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/links">
+                <i class="icon icon-lg icon-link"></i>
+                Links
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/zh-f" target="_blank">
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">Git中使用rebase命令更新本地分支</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menuShare">
+            <i class="icon icon-lg icon-share-alt"></i>
+        </a>
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">Git中使用rebase命令更新本地分支</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2017-09-28T06:34:49.000Z" itemprop="datePublished" class="page-time">
+  2017-09-28
+</time>
+
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+<article id="post-git-rebase-local-branch-with-upstream-branch" class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">Git中使用rebase命令更新本地分支</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017-09-28 14:34:49" datetime="2017-09-28T06:34:49.000Z" itemprop="datePublished">2017-09-28</time>
+
+            
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style="display:none">
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>最近在开发<code>trove</code>中，因为误提交，本地项目的<code>devel</code>分支已经与上游的的<code>devel</code>分支不一致了<a id="more"></a>。为了更好的创建分支，或者后面进行<code>cherry-pick</code>准备打包，都需要将本地的分支与上游的分支做一下rebase。</p>
+<blockquote>
+<p>注：上游指的是<a href="https://github.com/eayunstack/trove" target="_blank" rel="noopener"><code>eayunstack/trove</code></a>，本地指的是<a href="https://github.com/2hf/trove" target="_blank" rel="noopener"><code>2hf/trove</code></a></p>
+</blockquote>
+<p>首先，我们要添加<code>upstream</code>远程仓库：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git remote</span><br><span class="line">origin</span><br><span class="line">$ git remote add upstream git@github.com:eayunstack/trove.git</span><br><span class="line">$ git remote -v</span><br><span class="line">origin  git@github.com:2hf/trove.git (fetch)</span><br><span class="line">origin  git@github.com:2hf/trove.git (push)</span><br><span class="line">upstream        git@github.com:eayunstack/trove.git (fetch)</span><br><span class="line">upstream        git@github.com:eayunstack/trove.git (push)</span><br></pre></td></tr></table></figure></p>
+<p>然后更新<code>upstream</code>：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ git fetch upstream</span><br></pre></td></tr></table></figure></p>
+<p>此时远程仓库已经准备就绪了，这时候我们就可以rebase本地的分支了。两种做法：<br><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line"># option one</span><br><span class="line">$ git checkout devel</span><br><span class="line">$ git rebase -i upstream/devel</span><br><span class="line"></span><br><span class="line"># option two</span><br><span class="line">$ git checkout devel</span><br><span class="line">$ git reset --hard upstream/devel</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>注：如果之前<code>2hf/devel</code>分支已经做过push了，为了保持与上游一致，需要<code>git push -f</code>。</p>
+</blockquote>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+
+        
+        尊重原创，转载请标注作者及原文链接，感谢~
+        
+    </div>
+    <footer>
+        <a href="http://elbarco.cn">
+            <img src="/img/avatar.jpg" alt="Fan Zhang">
+            Fan Zhang
+        </a>
+    </footer>
+</blockquote>
+
+        
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-btn waves-light">Donate</a>
+</div>
+
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Git/">Git</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/rebase/">rebase</a></li></ul>
+
+
+            
+<div class="page-share-wrap">
+    
+
+<div class="page-share" id="pageShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://elbarco.cn/2017/09/28/git-rebase-local-branch-with-upstream-branch/&title=《Git中使用rebase命令更新本地分支》 — El barco&pic=http://elbarco.cn/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://elbarco.cn/2017/09/28/git-rebase-local-branch-with-upstream-branch/&title=《Git中使用rebase命令更新本地分支》 — El barco&source=最近在开发trove中，因为误提交，本地项目的devel分支已经与上游的的devel分支不一致了" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://elbarco.cn/2017/09/28/git-rebase-local-branch-with-upstream-branch/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Git中使用rebase命令更新本地分支》 — El barco&url=http://elbarco.cn/2017/09/28/git-rebase-local-branch-with-upstream-branch/&via=http://elbarco.cn" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://elbarco.cn/2017/09/28/git-rebase-local-branch-with-upstream-branch/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+
+    <a href="javascript:;" id="shareFab" class="page-share-fab waves-effect waves-circle">
+        <i class="icon icon-share-alt icon-lg"></i>
+    </a>
+</div>
+
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2017/10/17/introduction-to-trove-strategies/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h5 class="title">学习和认识Trove Strategies</h5>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2017/09/20/python-introduction-to-decorator-arguments/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h5 class="title">Python中的装饰器——装饰器参数篇</h5>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+<section class="comments" id="comments">
+    <div id="disqus_thread"></div>
+    <script>
+    var disqus_shortname = 'elbarco-cn';
+    lazyScripts.push('//' + disqus_shortname + '.disqus.com/embed.js')
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+<div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        Thanks for donating
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/wechat.jpg" alt="DonateQRCode">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/wechat.jpg" data-alipay="/img/alipay.jpg">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">Wechat</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">Alipay</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+
+
+</div>
+
+        <footer class="footer">
+    <!-- div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        UV：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        PV：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+        </p>
+    </div -->
+    <div class="bottom">
+    
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        UV：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        PV：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p><span>Fan Zhang &copy; 2016 - 2018</span>
+            <span>
+                
+                <a href="http://www.miitbeian.gov.cn/publish/query/indexFirst.action" target="_blank">京ICP备16008405号-2</a><br>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+
+<div class="global-share" id="globalShare">
+    <ul class="reset share-icons">
+      <li>
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://elbarco.cn/2017/09/28/git-rebase-local-branch-with-upstream-branch/&title=《Git中使用rebase命令更新本地分支》 — El barco&pic=http://elbarco.cn/img/avatar.jpg" data-title="微博">
+          <i class="icon icon-weibo"></i>
+        </a>
+      </li>
+      <li>
+        <a class="weixin share-sns wxFab" href="javascript:;" data-title="微信">
+          <i class="icon icon-weixin"></i>
+        </a>
+      </li>
+      <li>
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://elbarco.cn/2017/09/28/git-rebase-local-branch-with-upstream-branch/&title=《Git中使用rebase命令更新本地分支》 — El barco&source=最近在开发trove中，因为误提交，本地项目的devel分支已经与上游的的devel分支不一致了" data-title=" QQ">
+          <i class="icon icon-qq"></i>
+        </a>
+      </li>
+      <li>
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://elbarco.cn/2017/09/28/git-rebase-local-branch-with-upstream-branch/" data-title=" Facebook">
+          <i class="icon icon-facebook"></i>
+        </a>
+      </li>
+      <li>
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《Git中使用rebase命令更新本地分支》 — El barco&url=http://elbarco.cn/2017/09/28/git-rebase-local-branch-with-upstream-branch/&via=http://elbarco.cn" data-title=" Twitter">
+          <i class="icon icon-twitter"></i>
+        </a>
+      </li>
+      <li>
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://elbarco.cn/2017/09/28/git-rebase-local-branch-with-upstream-branch/" data-title=" Google+">
+          <i class="icon icon-google-plus"></i>
+        </a>
+      </li>
+    </ul>
+ </div>
+
+
+<div class="page-modal wx-share" id="wxShare">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://elbarco.cn/2017/09/28/git-rebase-local-branch-with-upstream-branch/" alt="微信分享二维码">
+</div>
+
+
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: true, REWARD: true };
+
+
+lazyScripts.push('//s95.cnzz.com/z_stat.php?id=1257688433&web_id=1257688433')
+
+</script>
+
+<script src="/js/main.min.js?v=1.6.10"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="/js/search.min.js?v=1.6.10" async></script>
+
+
+
+
+
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
