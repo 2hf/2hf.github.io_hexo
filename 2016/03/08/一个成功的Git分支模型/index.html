@@ -36,7 +36,7 @@
 <meta name="keywords" content="Git">
 <meta property="og:type" content="article">
 <meta property="og:title" content="一个成功的Git分支模型">
-<meta property="og:url" content="http://elbarco.cn/2016/03/08/一个成功的Git分支模型/index.html">
+<meta property="og:url" content="http://zh-f.cn/2016/03/08/一个成功的Git分支模型/index.html">
 <meta property="og:site_name" content="El barco">
 <meta property="og:description" content="前言从大公司跳到了小团队，版本控制软件从Git换到了SVN，然而前段时间，头儿让我研究下如何搭建私有Git服务器，如何“优雅”地使用Git。 针对如何搭建私有Git服务器，我选用的是GitLab，有一键安装包，也有很多Step by Step的教程，可自行Google。本文就上面提出的后两个问题，参考文章《A successful Git branching model》讲述如何合理的使用Git">
 <meta property="og:locale" content="default">
@@ -130,7 +130,7 @@
             <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
                 <i class="icon icon-lg icon-chevron-left"></i>
             </a>
-            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="输入感兴趣的关键字">
             <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
                 <i class="icon icon-lg icon-search"></i>
             </a>
@@ -288,7 +288,7 @@
         
     </div>
     <footer>
-        <a href="http://elbarco.cn">
+        <a href="http://zh-f.cn">
             <img src="/img/avatar.jpg" alt="Fan Zhang">
             Fan Zhang
         </a>
@@ -314,7 +314,7 @@
 <div class="page-share" id="pageShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://elbarco.cn/2016/03/08/一个成功的Git分支模型/&title=《一个成功的Git分支模型》 — El barco&pic=http://elbarco.cn/img/avatar.jpg" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://zh-f.cn/2016/03/08/一个成功的Git分支模型/&title=《一个成功的Git分支模型》 — El barco&pic=http://zh-f.cn/img/avatar.jpg" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -324,23 +324,23 @@
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://elbarco.cn/2016/03/08/一个成功的Git分支模型/&title=《一个成功的Git分支模型》 — El barco&source=前言从大公司跳到了小团队，版本控制软件从Git换到了SVN，然而前段时间，头儿让我研究下如何搭建私有Git服务器，如何“优雅”地使用Git。
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://zh-f.cn/2016/03/08/一个成功的Git分支模型/&title=《一个成功的Git分支模型》 — El barco&source=前言从大公司跳到了小团队，版本控制软件从Git换到了SVN，然而前段时间，头儿让我研究下如何搭建私有Git服务器，如何“优雅”地使用Git。
 针对如何搭建..." data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://elbarco.cn/2016/03/08/一个成功的Git分支模型/" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://zh-f.cn/2016/03/08/一个成功的Git分支模型/" data-title=" Facebook">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《一个成功的Git分支模型》 — El barco&url=http://elbarco.cn/2016/03/08/一个成功的Git分支模型/&via=http://elbarco.cn" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《一个成功的Git分支模型》 — El barco&url=http://zh-f.cn/2016/03/08/一个成功的Git分支模型/&via=http://zh-f.cn" data-title=" Twitter">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://elbarco.cn/2016/03/08/一个成功的Git分支模型/" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://zh-f.cn/2016/03/08/一个成功的Git分支模型/" data-title=" Google+">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -385,23 +385,31 @@
     
 
 
+
+
+
+
+
+
+
+
+
 <section class="comments" id="comments">
-    <div id="disqus_thread"></div>
+    <div id="gitment_thread"></div>
+    <link rel="stylesheet" href="//unpkg.com/gitment/style/default.css">
+    <script src="//unpkg.com/gitment/dist/gitment.browser.js"></script>
     <script>
-    var disqus_shortname = 'elbarco-cn';
-    lazyScripts.push('//' + disqus_shortname + '.disqus.com/embed.js')
+        var gitment = new Gitment({
+            owner: 'zh-f',
+            repo: 'zh-f.github.io',
+            oauth: {
+                client_id: '231b2fb09bb199fb6dc5',
+                client_secret: '0e3368eb7d3e71d22f07ed1464556d56f6fa82f4',
+            },
+        })
+        gitment.render('comments')
     </script>
-    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </section>
-
-
-
-
-
-
-
-
-
 
 
 
@@ -452,7 +460,7 @@
 
         <p>
             
-            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+            <span>博客内容遵循 <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh">知识共享 署名 - 非商业性 - 相同方式共享 4.0 国际协议</a></span>
         </p>
     </div -->
     <div class="bottom">
@@ -485,7 +493,7 @@
 <div class="global-share" id="globalShare">
     <ul class="reset share-icons">
       <li>
-        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://elbarco.cn/2016/03/08/一个成功的Git分支模型/&title=《一个成功的Git分支模型》 — El barco&pic=http://elbarco.cn/img/avatar.jpg" data-title="微博">
+        <a class="weibo share-sns" target="_blank" href="http://service.weibo.com/share/share.php?url=http://zh-f.cn/2016/03/08/一个成功的Git分支模型/&title=《一个成功的Git分支模型》 — El barco&pic=http://zh-f.cn/img/avatar.jpg" data-title="微博">
           <i class="icon icon-weibo"></i>
         </a>
       </li>
@@ -495,23 +503,23 @@
         </a>
       </li>
       <li>
-        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://elbarco.cn/2016/03/08/一个成功的Git分支模型/&title=《一个成功的Git分支模型》 — El barco&source=前言从大公司跳到了小团队，版本控制软件从Git换到了SVN，然而前段时间，头儿让我研究下如何搭建私有Git服务器，如何“优雅”地使用Git。
+        <a class="qq share-sns" target="_blank" href="http://connect.qq.com/widget/shareqq/index.html?url=http://zh-f.cn/2016/03/08/一个成功的Git分支模型/&title=《一个成功的Git分支模型》 — El barco&source=前言从大公司跳到了小团队，版本控制软件从Git换到了SVN，然而前段时间，头儿让我研究下如何搭建私有Git服务器，如何“优雅”地使用Git。
 针对如何搭建..." data-title=" QQ">
           <i class="icon icon-qq"></i>
         </a>
       </li>
       <li>
-        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://elbarco.cn/2016/03/08/一个成功的Git分支模型/" data-title=" Facebook">
+        <a class="facebook share-sns" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http://zh-f.cn/2016/03/08/一个成功的Git分支模型/" data-title=" Facebook">
           <i class="icon icon-facebook"></i>
         </a>
       </li>
       <li>
-        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《一个成功的Git分支模型》 — El barco&url=http://elbarco.cn/2016/03/08/一个成功的Git分支模型/&via=http://elbarco.cn" data-title=" Twitter">
+        <a class="twitter share-sns" target="_blank" href="https://twitter.com/intent/tweet?text=《一个成功的Git分支模型》 — El barco&url=http://zh-f.cn/2016/03/08/一个成功的Git分支模型/&via=http://zh-f.cn" data-title=" Twitter">
           <i class="icon icon-twitter"></i>
         </a>
       </li>
       <li>
-        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://elbarco.cn/2016/03/08/一个成功的Git分支模型/" data-title=" Google+">
+        <a class="google share-sns" target="_blank" href="https://plus.google.com/share?url=http://zh-f.cn/2016/03/08/一个成功的Git分支模型/" data-title=" Google+">
           <i class="icon icon-google-plus"></i>
         </a>
       </li>
@@ -522,7 +530,7 @@
 <div class="page-modal wx-share" id="wxShare">
     <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
-    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://elbarco.cn/2016/03/08/一个成功的Git分支模型/" alt="微信分享二维码">
+    <img src="//api.qrserver.com/v1/create-qr-code/?data=http://zh-f.cn/2016/03/08/一个成功的Git分支模型/" alt="微信分享二维码">
 </div>
 
 
